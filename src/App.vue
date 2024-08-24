@@ -1,6 +1,7 @@
 <template>
   <main>
     <NavBar />
+    <main></main>
   </main>
 </template>
 
@@ -8,4 +9,8 @@
 import NavBar from './components/NavBar.vue'
 </script>
 
-<style scoped></style>
+<style scoped>
+main {
+  height: 200vh;
+}
+</style>

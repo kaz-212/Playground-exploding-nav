@@ -1,58 +1,97 @@
 <template>
-  <div class="nav-container" @mouseenter="expand" @mouseleave="collapse" ref="navRef">
-    <div class="nav-content">
+  <header class="nav-container" @mouseenter="expand" ref="navRef">
+    <nav class="nav-content" ref="navContent">
       <span class="prefix" ref="prefixRef">My</span>
-      <div class="letter-container">
-        <span class="letter" ref="aRef">
+      <ul class="links">
+        <li class="link-container">
           <span class="visible-letter">A</span>
           <span class="full-word">About</span>
-        </span>
-        <span class="letter" ref="bRef">
+        </li>
+        <li class="link-container">
           <span class="visible-letter">B</span>
-          <span class="full-word">Browse Work</span>
-        </span>
-        <span class="letter" ref="cRef">
+          <span class="full-word">Browse</span>
+        </li>
+        <li class="link-container">
           <span class="visible-letter">C</span>
           <span class="full-word">Contact</span>
-        </span>
-      </div>
+        </li>
+      </ul>
       <span class="suffix" ref="suffixRef">'s</span>
-    </div>
-  </div>
+    </nav>
+  </header>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import gsap from 'gsap'
 
 const navRef = ref(null)
+const navContent = ref(null)
 const prefixRef = ref(null)
 const suffixRef = ref(null)
-const aRef = ref(null)
-const bRef = ref(null)
-const cRef = ref(null)
+
+let scrollListener = null
 
 const tl = gsap.timeline({ paused: true })
 
 onMounted(() => {
-  tl.to([prefixRef.value, suffixRef.value], { opacity: 0, duration: 0.3 }).to(
-    [aRef.value, bRef.value, cRef.value],
-    {
-      width: 'auto',
-      duration: 0.5,
-      stagger: 0.1
-    },
-    '-=0.2'
-  )
+  tl.to([prefixRef.value, suffixRef.value], { opacity: 0, duration: 0.2 })
+    .to(
+      navContent.value,
+      {
+        duration: 0.5,
+        width: '50%'
+      },
+      '<0.1'
+    )
+    .to(
+      '.link-container',
+      {
+        marginRight: '200px',
+        duration: 1.2,
+        ease: 'elastic.out(1,1)'
+      },
+      '<'
+    )
+    .to(
+      '.full-word',
+      {
+        opacity: 1
+      },
+      '<'
+    )
 })
 
-// const expand = () => {
-tl.play()
-// }
+const expand = () => {
+  tl.play()
+  addScrollListener()
+}
 
 const collapse = () => {
   tl.reverse()
+  removeScrollListener()
 }
+
+const handleScroll = () => {
+  collapse()
+}
+
+const addScrollListener = () => {
+  if (!scrollListener) {
+    scrollListener = window.addEventListener('scroll', handleScroll, { passive: true })
+  }
+}
+
+const removeScrollListener = () => {
+  if (scrollListener) {
+    window.removeEventListener('scroll', handleScroll)
+    scrollListener = null
+  }
+}
+
+onBeforeUnmount(() => {
+  removeScrollListener()
+})
 </script>
 
 <style scoped lang="scss">
@@ -69,38 +108,31 @@ const collapse = () => {
   display: flex;
   align-items: center;
   padding: 0 20px;
-}
 
-.nav-content {
-  display: flex;
-  align-items: center;
-  font-size: 1.2em;
-  font-weight: bold;
-}
+  .nav-content {
+    display: flex;
+    width: auto;
+    font-size: 1.2em;
+    font-weight: bold;
+    /* background-color: red; */
+  }
 
-.letter-container {
-  display: flex;
-}
+  .links {
+    display: flex;
+    width: 100%;
+    /* justify-content: space-between; */
+    list-style: none;
+    cursor: pointer;
 
-.letter {
-  position: relative;
-  margin: 0 5px;
-  cursor: pointer;
-  overflow: hidden;
-  display: inline-block;
-}
+    .link-container {
+      position: relative;
 
-.visible-letter {
-  display: inline-block;
-}
-
-.full-word {
-  position: absolute;
-  left: 0;
-  top: 0;
-  white-space: nowrap;
-  opacity: 0;
-  width: 0;
-  overflow: hidden;
+      .full-word {
+        position: absolute;
+        left: 0;
+        opacity: 0;
+      }
+    }
+  }
 }
 </style>
